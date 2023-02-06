@@ -12,7 +12,7 @@ import com.example.testdemoapp.adapter.ListDataAdapater
 import com.example.testdemoapp.adapter.ViewPagerAdapter
 import com.example.testdemoapp.databinding.ActivityMainBinding
 import com.example.testdemoapp.models.ListModel
-import com.example.testdemoapp.models.MainModel
+import com.example.testdemoapp.models.ViewPagerModel
 
 
 
@@ -25,13 +25,13 @@ class MainActivity : AppCompatActivity() {
         setContentView(binding.root)
         val list = ArrayList<ListModel>()
         list.add(ListModel(R.drawable.search, "Test"))
-        var mainModel = ArrayList<MainModel>()
-        var mainList = MainModel(0, R.drawable.car1, list)
-        mainModel.add(mainList)
-        mainModel.add(mainList)
-        mainModel.add(mainList)
-        mainModel.add(mainList)
-        binding.viewPager.adapter = ViewPagerAdapter(mainModel)
+        var viewPagerModel = ArrayList<ViewPagerModel>()
+        var mainList = ViewPagerModel(0, R.drawable.car1, list)
+        viewPagerModel.add(mainList)
+        viewPagerModel.add(mainList)
+        viewPagerModel.add(mainList)
+        viewPagerModel.add(mainList)
+        binding.viewPager.adapter = ViewPagerAdapter(viewPagerModel)
         binding.tabLayout.setupWithViewPager(binding.viewPager)
         var layoutManager = LinearLayoutManager(
             this@MainActivity,

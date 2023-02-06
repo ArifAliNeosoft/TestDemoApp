@@ -7,9 +7,9 @@ import android.widget.ImageView
 import androidx.viewpager.widget.PagerAdapter
 import androidx.viewpager.widget.ViewPager
 import com.example.testdemoapp.R
-import com.example.testdemoapp.models.MainModel
+import com.example.testdemoapp.models.ViewPagerModel
 
-class ViewPagerAdapter (val sections: List<MainModel>) : PagerAdapter() {
+class ViewPagerAdapter (val sections: List<ViewPagerModel>) : PagerAdapter() {
 
     override fun getCount(): Int {
         return sections.size
