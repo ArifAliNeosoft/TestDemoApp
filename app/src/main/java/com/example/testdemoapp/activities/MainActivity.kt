@@ -5,77 +5,62 @@ import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.viewpager.widget.ViewPager
-import com.example.testdemoapp.R
-import com.example.testdemoapp.adapter.ListDataAdapater
-import com.example.testdemoapp.adapter.ViewPagerAdapter
+import com.example.testdemoapp.adapter.ProductListAdapter
+import com.example.testdemoapp.adapter.ProductSliderAdapter
 import com.example.testdemoapp.databinding.ActivityMainBinding
-import com.example.testdemoapp.models.ListModel
-import com.example.testdemoapp.models.ViewPagerModel
-
+import com.example.testdemoapp.models.ProductListModel
+import com.example.testdemoapp.viewmodel.ProductViewModel
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 
 class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
+    private var positionOfSearch: Int = 0
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         getSupportActionBar()!!.hide()
         setContentView(binding.root)
-        val list = ArrayList<ListModel>()
-        list.add(ListModel(R.drawable.search, "Test"))
-        var viewPagerModel = ArrayList<ViewPagerModel>()
-        var mainList = ViewPagerModel(0, R.drawable.car1, list)
-        viewPagerModel.add(mainList)
-        viewPagerModel.add(mainList)
-        viewPagerModel.add(mainList)
-        viewPagerModel.add(mainList)
-        binding.viewPager.adapter = ViewPagerAdapter(viewPagerModel)
+        val productViewModel = ViewModelProvider(this).get(ProductViewModel::class.java)
+        binding.viewPager.adapter = ProductSliderAdapter(productViewModel.getProductList())
         binding.tabLayout.setupWithViewPager(binding.viewPager)
         var layoutManager = LinearLayoutManager(
             this@MainActivity,
             LinearLayoutManager.VERTICAL,
             false
         )
-
-
-        var rvDataList = ArrayList<String>()
-        rvDataList.add("TEST")
-        rvDataList.add("DATA")
-        rvDataList.add("TEST")
-        rvDataList.add("DATA")
-        rvDataList.add("TEST")
-        rvDataList.add("DATA")
-        rvDataList.add("TEST")
-        rvDataList.add("DATA")
-        rvDataList.add("TEST")
-        rvDataList.add("DATA")
         binding.rvList.layoutManager = layoutManager
-
         binding.rvList.adapter =
-            ListDataAdapater(applicationContext, MainActivity(), rvDataList, 10)
+            ProductListAdapter(
+                productViewModel.getProductList().get(0).list
+            )
+
+        CoroutineScope(Dispatchers.Main).launch {
+            sliderDataChange(productViewModel)
+            searchByProductName(productViewModel)
+        }
 
 
+    }
+
+    private fun sliderDataChange(productViewModel: ProductViewModel) {
         binding.viewPager.addOnPageChangeListener(object : ViewPager.SimpleOnPageChangeListener() {
             override fun onPageSelected(position: Int) {
-                if (position == 0) {
-                    binding.rvList.adapter =
-                        ListDataAdapater(applicationContext, MainActivity(), rvDataList, 10)
-                } else if (position == 1) {
-                    binding.rvList.adapter =
-                        ListDataAdapater(applicationContext, MainActivity(), rvDataList, 4)
-                } else if (position == 2) {
-                    binding.rvList.adapter =
-                        ListDataAdapater(applicationContext, MainActivity(), rvDataList, 1)
-                } else if (position == 3) {
-                    binding.rvList.adapter =
-                        ListDataAdapater(applicationContext, MainActivity(), rvDataList, 6)
-                }
-
+                positionOfSearch = position
+                binding.rvList.adapter =
+                    ProductListAdapter(
+                        productViewModel.getProductList().get(position).list
+                    )
             }
         })
+    }
 
+    private fun searchByProductName(productViewModel: ProductViewModel) {
         binding.etSearch.addTextChangedListener(object : TextWatcher {
             override fun afterTextChanged(s: Editable) {}
             override fun beforeTextChanged(
@@ -88,24 +73,25 @@ class MainActivity : AppCompatActivity() {
                 s: CharSequence, start: Int,
                 before: Int, count: Int
             ) {
+                val rvProductList = ArrayList<ProductListModel>()
+                rvProductList.clear()
                 if (s.length != 0) {
-                    val rvDataList1 = ArrayList<String>()
-                    rvDataList1.clear()
-                    for (list in rvDataList) {
-                        if (list.contains(s.toString(), ignoreCase = true)) {
-
-                            rvDataList1.add(list)
-
+                    for (list in productViewModel.getProductList().get(positionOfSearch).list) {
+                        if (list.title.contains(s.toString(), ignoreCase = true)) {
+                            rvProductList.add(list)
                         }
                     }
                     binding.rvList.adapter =
-                        ListDataAdapater(applicationContext, MainActivity(), rvDataList1, 0)
+                        ProductListAdapter(
+                            rvProductList
+                        )
                 } else {
                     binding.rvList.adapter =
-                        ListDataAdapater(applicationContext, MainActivity(), rvDataList, 10)
+                        ProductListAdapter(
+                            productViewModel.getProductList().get(positionOfSearch).list
+                        )
                 }
             }
         })
-
     }
 }
